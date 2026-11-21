@@ -6,7 +6,7 @@ Installable comme application (PWA) sur téléphone et ordinateur, avec une vers
 
 ## Démarrage rapide
 
-Prérequis : **Node.js ≥ 22.13** (la base SQLite est intégrée à Node, aucune compilation native).
+Prérequis : **Node.js ≥ 20**. En local, la base est un fichier SQLite (`data/stock.db`) ; en production, une base **Turso** (SQLite hébergé).
 
 ```bash
 git clone https://github.com/erictonih24/Gestion-des-Stock-PPN.git
@@ -18,6 +18,31 @@ npm run seed                # (optionnel) données de démonstration
 ```
 
 Au premier démarrage, le compte `ADMIN_USERNAME` est créé avec `ADMIN_PASSWORD` ; **le changement du mot de passe est exigé à la première connexion**.
+
+## Déploiement sur Vercel (base Turso)
+
+Vercel n'a pas de disque durable : la base doit être externe. L'application utilise Turso, compatible SQLite.
+
+1. **Créer la base Turso** (compte gratuit sur turso.tech, ou via Vercel → Marketplace → Turso) :
+   ```bash
+   turso db create stock-ppn
+   turso db show stock-ppn --url         # → TURSO_DATABASE_URL
+   turso db tokens create stock-ppn      # → TURSO_AUTH_TOKEN
+   ```
+2. **Pousser le code sur GitHub**, puis sur vercel.com : *Add New → Project* → choisir le dépôt (aucun réglage de build).
+3. **Variables d'environnement** (Project → Settings → Environment Variables, en Production) :
+
+   | Variable | Valeur |
+   |---|---|
+   | `JWT_SECRET` | `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"` |
+   | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | compte admin créé au 1er accès (changement de mot de passe exigé) |
+   | `TURSO_DATABASE_URL` / `TURSO_AUTH_TOKEN` | valeurs de l'étape 1 |
+   | `COMPANY_NAME`, `COMPANY_ADDRESS`, `COMPANY_PHONE`, `COMPANY_NIF`, `COMPANY_STAT`, `CURRENCY` | infos imprimées sur les factures |
+   | `NODE_ENV` | `production` |
+4. **Redéployer**. Les tables et le compte admin sont créés automatiquement au premier accès.
+5. Données de démonstration (facultatif) : en local, avec `TURSO_*` dans `.env`, lancer `npm run seed`.
+
+Limite connue : la limitation de débit de la page de connexion est en mémoire, donc par instance serverless. Le verrouillage du compte après 5 échecs, lui, est stocké en base et reste efficace.
 
 ## Modules
 

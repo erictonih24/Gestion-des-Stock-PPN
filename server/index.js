@@ -19,6 +19,9 @@ app.use(helmet({
   } },
   hsts: PROD ? undefined : false
 }));
+// Attend la création des tables et du compte admin avant de traiter une requête
+const ready = db.ready.then(bootstrapAdmin);
+app.use((req, res, next) => ready.then(() => next(), next));
 app.use(express.json({ limit: '200kb' }));
 app.use(cookieParser());
 
@@ -42,14 +45,18 @@ app.use((err, req, res, next) => {
 });
 
 // Création du compte administrateur au premier démarrage
-if (!db.prepare('SELECT 1 FROM users LIMIT 1').get()) {
+async function bootstrapAdmin() {
+  if (await db.get('SELECT 1 AS x FROM users LIMIT 1')) return;
   const u = process.env.ADMIN_USERNAME || 'admin';
   const pw = process.env.ADMIN_PASSWORD;
   const problem = passwordProblem(pw);
-  if (problem) { console.error('ADMIN_PASSWORD invalide : ' + problem + ' (voir .env.example).'); process.exit(1); }
-  db.prepare("INSERT INTO users (username, full_name, password_hash, role, must_change_password) VALUES (?,?,?,?,1)")
-    .run(u, 'Administrateur', bcrypt.hashSync(pw, 12), 'admin');
+  if (problem) { console.error('ADMIN_PASSWORD invalide : ' + problem + ' (voir .env.example).'); throw new Error('ADMIN_PASSWORD invalide'); }
+  await db.run("INSERT OR IGNORE INTO users (username, full_name, password_hash, role, must_change_password) VALUES (?,?,?,?,1)", [u, 'Administrateur', bcrypt.hashSync(pw, 12), 'admin']);
   console.log(`Compte administrateur « ${u} » créé (changement de mot de passe exigé à la 1re connexion).`);
 }
-const port = Number(process.env.PORT) || 3000;
-app.listen(port, () => console.log(`Gestion Stock PPN → http://localhost:${port}`));
+module.exports = app;
+if (!process.env.VERCEL) {
+  const port = Number(process.env.PORT) || 3000;
+  ready.then(() => app.listen(port, () => console.log(`Gestion Stock PPN → http://localhost:${port}`)))
+       .catch(() => process.exit(1));
+}

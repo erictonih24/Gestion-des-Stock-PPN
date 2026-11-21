@@ -30,12 +30,12 @@ function publicUser(u) {
            must_change_password: !!u.must_change_password, permissions: PERMISSIONS[u.role] || [] };
 }
 
-function requireAuth(req, res, next) {
+async function requireAuth(req, res, next) {
   const token = req.cookies[COOKIE];
   if (!token) return res.status(401).json({ error: 'Connexion requise.' });
   try {
     const p = jwt.verify(token, SECRET);
-    const u = db.prepare('SELECT * FROM users WHERE id = ?').get(p.sub);
+    const u = await db.get('SELECT * FROM users WHERE id = ?', [p.sub]);
     if (!u || !u.active || u.token_version !== p.v) return res.status(401).json({ error: 'Session expirée.' });
     req.user = u;
     if (u.must_change_password && !req.originalUrl.startsWith('/api/auth/')) {
@@ -44,10 +44,10 @@ function requireAuth(req, res, next) {
     next();
   } catch { res.status(401).json({ error: 'Session expirée.' }); }
 }
-const can = (...perms) => (req, res, next) => {
+const can = (...perms) => async (req, res, next) => {
   const mine = PERMISSIONS[req.user.role] || [];
   if (perms.some(p => mine.includes(p))) return next();
-  db.audit(req, 'ACCES_REFUSE', `${req.method} ${req.originalUrl}`);
+  await db.audit(req, 'ACCES_REFUSE', `${req.method} ${req.originalUrl}`);
   res.status(403).json({ error: "Vous n'avez pas le droit d'effectuer cette action." });
 };
 function passwordProblem(pw) {
