@@ -1,0 +1,20 @@
+{
+  "name": "Gestion Stock PPN",
+  "short_name": "Stock PPN",
+  "description": "Stock, ventes, achats, recettes et facturation pour grossiste PPN",
+  "lang": "fr",
+  "start_url": "/app",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#10302C",
+  "theme_color": "#10302C",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "shortcuts": [
+    { "name": "Nouvelle vente", "url": "/app#/sales" },
+    { "name": "Réapprovisionnement", "url": "/app#/restock" }
+  ]
+}

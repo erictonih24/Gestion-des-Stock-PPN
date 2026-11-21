@@ -1,0 +1,10 @@
+{
+  "name": "stock-ppn-desktop",
+  "version": "1.0.0",
+  "description": "Logiciel de bureau (Windows / macOS / Linux) pour Gestion Stock PPN",
+  "main": "main.js",
+  "private": true,
+  "scripts": { "start": "electron .", "build": "electron-builder" },
+  "devDependencies": { "electron": "^33.0.0", "electron-builder": "^25.0.0" },
+  "build": { "appId": "mg.ppn.stock", "productName": "Stock PPN", "win": { "target": "nsis" }, "linux": { "target": "AppImage" }, "mac": { "target": "dmg" } }
+}

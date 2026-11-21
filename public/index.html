@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Connexion · Stock PPN</title>
+  <meta name="theme-color" content="#10302C">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body class="login">
+  <section class="login-brand">
+    <p class="brand-mark">Stock PPN</p>
+    <h1>Chaque sac compté,<br>chaque vente tracée.</h1>
+    <p>Stock, achats, ventes, recettes et factures de votre dépôt, au même endroit.</p>
+  </section>
+  <main class="login-panel">
+    <form id="login-form" autocomplete="on" novalidate>
+      <h2>Se connecter</h2>
+      <label>Identifiant<input name="username" autocomplete="username" required autofocus></label>
+      <label>Mot de passe<input name="password" type="password" autocomplete="current-password" required></label>
+      <p id="login-error" class="form-error" role="alert" hidden></p>
+      <button class="btn primary" type="submit">Se connecter</button>
+    </form>
+  </main>
+  <script src="/js/login.js" defer></script>
+</body>
+</html>
